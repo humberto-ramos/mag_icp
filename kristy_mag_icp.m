@@ -15,8 +15,8 @@ trajectory = load("trajectory_2.mat");
 % Red Points generate from Fake Map (visualize_map.m file)
 
 % Specify the range for plot (size of flight space)
-x_range = -1.1:0.01:1.2;
-y_range = -3.5:0.01:3.5;
+% x_range = -1.1:0.01:1.2;
+% y_range = -3.5:0.01:3.5;
 % x_range = -1.1:0.01:1.2;
 % y_range = -3.5:0.01:3.5;
 % x_range = -1.1:0.01:1.2;
