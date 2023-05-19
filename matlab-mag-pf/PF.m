@@ -1,0 +1,39 @@
+%Humberto Ramos, August 2022%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%This is the base code for a MC particle filter.
+%Tuning parameters are inside pf_robot.
+%This implementation uses a fake map which is totally arbitrary. To change
+%the artificial map, see aMap.m.
+%The code can follow a guidance law or xbox inputs to move the robot. A
+%guidance law would need to compute the necessary delta_p and delta_psi in
+%the pf_robot.m file.
+
+%To run the particle filter run PF.m
+%To use an actual discrete map, interpolation functions will be needed so
+%that the robot can obtain a measurement at locations where there is no
+%information.
+
+%The xbox inputs are not processed before going into the filter, and
+%non-zero inputs for a non-deflected stick is expected. The process noise
+%is a function of the xbox sticks input and thus, some jittering can be
+%observed by default. To remove this, a deadzone must be established, but
+%this is not implemented in this script.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Run particle filter 
+close all;
+clear all;
+clc
+visualize_map %load magnetic map
+%We will use an actual map in the near future. For now I will pass an empty
+%map variable.
+map = [];
+addpath(genpath("matlab-input-1.2"))
+USE_JOYSTICK = 'true';
+%Run the PF
+[xtrue_pf,xk_pf,state_errors_pf,P_pf,t,trajectory_matrix] = pf_robot(map,USE_JOYSTICK);
+           
+save trajectory.mat trajectory_matrix -mat
+      
+      
+      
+      
+
