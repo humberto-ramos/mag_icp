@@ -69,12 +69,14 @@ if nargin<2
 elseif nargin<6
     
     thres=1e-5;                     % threshold to stop icp iterations
+    % thres=0.0001;                     % threshold to stop icp iterations
     if nargin<5
         critFun=0;                  % critFun method, LS
         if nargin<4
             minIter=5;              % min number of icp iterations
             if nargin<3
-                maxIter=100;        % max number of icp iterations
+                % maxIter=100;        % max number of icp iterations
+                maxIter=20;        % max number of icp iterations
             end
         end
     end
@@ -86,9 +88,9 @@ if or(isempty(model),isempty(data))
 end
 
 % Use default values
-
 if isempty(maxIter)
-    maxIter=100;
+    % maxIter=100;
+    maxIter=40;
 end
 
 if isempty(minIter)
@@ -101,10 +103,10 @@ end
 
 if isempty(thres)
     thres=1e-5;
+    % thres=0.0001;
 end
 
 % Size of model points and data points
-
 if (size(model,2)<size(model,1))
     mTranspose=true;
     m=size(model,2);
@@ -126,7 +128,6 @@ end
 N=size(data,2);
 
 % Create closest point search structure
-
 if m<4
     if mTranspose
         DT=delaunayTriangulation(model);
@@ -140,18 +141,15 @@ else
 end
 
 % Initiate weights (Only for robust criterion)
-
 if critFun>0
     wghs=ones(N,1);
 end
 
 % Initiate transformation
-
 TR=eye(m);
 TT=zeros(m,1);
 
 % Start the ICP algorithm
-
 res=9e99;
 
 for iter=1:maxIter
@@ -159,7 +157,6 @@ for iter=1:maxIter
     oldres=res;
     
     % Find closest model points to data points
-    
     if isempty(DT)
         if mTranspose
             for i=1:N
@@ -330,7 +327,7 @@ xlabel("x(m)");
 ylabel("y(m)");
 legend("Model samples",'Truth','ICP')
 
-% pause(1)
+pause(1)
 
 data=Ri*data;                       % Apply transformation
 for i=1:m
@@ -339,7 +336,7 @@ end
     
 
 
-    TR=Ri*TR                           % Update transformation
+    TR=Ri*TR;                           % Update transformation
     TT=Ri*TT+Ti;                        %
     
     if iter >= minIter
