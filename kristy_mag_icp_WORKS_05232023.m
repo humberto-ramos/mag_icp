@@ -9,6 +9,13 @@ partial_update = 1;
 trajectory = load("trajectory_1.mat");
 
 
+%% Generate model points to represent Magnetic Map
+% Red Points generate from Fake Map (visualize_map.m file)
+% Specify the range for plot (size of flight space)
+x_range = -1.1:0.01:1.2;
+y_range = -3.5:0.01:3.5;
+
+
 %% Generate data points for path traveled 
 % Blue data generated from Fake Map or Path traveled in Fake Map
 % Import Data from file (import at top of this file)
@@ -16,8 +23,11 @@ data = trajectory.trajectory_matrix;
 
 
 %% -- ARTIFICIAL DATA-- %%
+
 sigma = 0.05;
 true_path = data;
+
+% -- GENERATE ESTIMATE PATH AS +SIGMA FROM TRUE PATH --
 
 % WE MAY NEED A MORE SOPHISTICATED APPROACH THAT ACCOUNTS
 %FOR CORRELATIONS. MAY BE EXTRACTED FROM COVARIANCE MATRIX OR NORMAL VECTOR TO
@@ -43,6 +53,9 @@ for i = 1: n_slopes
     theta = atan(path_data(1, i));
     path_data(2, i) = theta;
     % Calculate Unit Vector
+    % u = zeros(2, 1);
+    % u(1,1) = cos(theta);
+    % u(2,1) = sin(theta);
     path_data(3, i) = cos(theta);
     path_data(4, i) = sin(theta);
 end    
@@ -120,9 +133,7 @@ end
 
 
 %% ADD ERROR TO INITIAL TRAJECTORY (STARTING POINT)
-error_x = 0.1;
-% estimated_path = true_path;
-% initial_path = estim_path;
+error_x = -0.1;
 initial_path(1,:) = initial_path(1,:) + error_x;
 
 
@@ -130,14 +141,21 @@ initial_path(1,:) = initial_path(1,:) + error_x;
 model = [est_plus_half, est_minus_half, estim_path, est_minus, est_plus, est_minus2, est_plus2];
 
 
-%% -- GAUSSIAN NOISE (Added to measurements) -- 
-sigma_nt = 50;
+%% -- GAUSSIAN NOISE -- 
+sigma_nt = 0;
 N = numel(initial_path(1,:));
+
 initial_path(3, :) = initial_path(3, :) + sigma_nt*randn(1,N);
 
 
-%% -- Print Residuals -- %%
+%% -- RUN ICP -- %%
 [RotMat,TransVec,dataOut,res]=icp(model,initial_path,[], [], 1,0.000000001,true_path);
+
+
+%% Reference:
+%
+% Bergström, P. and Edlund, O. 2014, 'Robust registration of point sets using iteratively reweighted least squares'
+% Computational Optimization and Applications, vol 58, no. 3, pp. 543-561, 10.1007/s10589-014-9643-2
 
 
 %% -- PLOT: Model points and data points in transformed positions
@@ -145,10 +163,7 @@ figure(3)
 title("Y_Range Trajectory Fitting")
 plot3(dataOut(1,:),dataOut(2,:),dataOut(3,:),'b*',true_path(1,:),true_path(2,:),true_path(3,:),'k.', estim_path(1,:),estim_path(2,:),estim_path(3,:),'g.', initial_path(1,:),initial_path(2,:),initial_path(3,:),'r.')  
 % model(1,:),model(2,:),model(3,:),'b*', estim_path(1,:),estim_path(2,:),estim_path(3,:),'g.', true_path(1,:),true_path(2,:),true_path(3,:),'k.', 
+
 legend('ICP solution', 'Truth','Estimate (Truth - 0.05sigx)','Initial condition')
 
 
-%% Reference:
-%
-% Bergström, P. and Edlund, O. 2014, 'Robust registration of point sets using iteratively reweighted least squares'
-% Computational Optimization and Applications, vol 58, no. 3, pp. 543-561, 10.1007/s10589-014-9643-2
