@@ -1,4 +1,4 @@
-function [TR,TT,data,res] = icp(model,data,maxIter,minIter,critFun,thres,true_path)
+function [TR,TT,data,res] = icp(model,data,maxIter,minIter,critFun,thres,true_path, initial_path, est_path)
 % ICP (iterative closest point) algorithm
 %
 %        # point-to-point distance minimization
@@ -68,8 +68,8 @@ if nargin<2
     
 elseif nargin<6
     
-    % thres=1e-5;                     % threshold to stop icp iterations
-    thres=1e-20;                     % threshold to stop icp iterations
+    thres=1e-5;                     % threshold to stop icp iterations
+    % thres=0.0001;                     % threshold to stop icp iterations
     if nargin<5
         critFun=0;                  % critFun method, LS
         if nargin<4
@@ -90,7 +90,7 @@ end
 % Use default values
 if isempty(maxIter)
     % maxIter=100;
-    maxIter=20;
+    maxIter=40;
 end
 
 if isempty(minIter)
@@ -102,8 +102,8 @@ if isempty(critFun)
 end
 
 if isempty(thres)
-    % thres=1e-5;
-    thres=1e-20;
+    thres=1e-5;
+    % thres=0.0001;
 end
 
 % Size of model points and data points
@@ -318,25 +318,56 @@ for iter=1:maxIter
 
 
    
-figure(2)
-
-plot3(model(1,:),model(2,:),model(3,:),'r.',true_path(1,:),true_path(2,:),true_path(3,:),'k-o',data(1,:),data(2,:),data(3,:),'b*')    
-% plot3(model(1,:),model(2,:),model(3,:),'r.',data(1,:),data(2,:),data(3,:),'b.')    
-title("Y_Range Trajectory Fitting")
+% figure(2)
+figure(3)
+subplot(2,1,1)
+plot3(initial_path(1,:),initial_path(2,:),initial_path(3,:),'g*', ...
+    model(1,:),model(2,:),model(3,:),'r.', ...
+    est_path(1,:),est_path(2,:),est_path(3,:),'m.', ...
+    data(1,:),data(2,:),data(3,:),'b*', ...
+    true_path(1,:),true_path(2,:),true_path(3,:),'k-o')   
+title("Trajectory Fitting using ICP")
 xlabel("x(m)");
 ylabel("y(m)");
-legend("Model samples",'Truth','ICP')
+legend('Initial Position',"Model","Estimate",'ICP Solution','Truth')
+legend('boxoff')
+legend('Location','northeast')
 
-pause(2)
 
-data=Ri*data;                       % Apply transformation
+figure(3)
+subplot(2,1,2)
+plot3(initial_path(1,:),initial_path(2,:),initial_path(3,:),'g*', ...
+    model(1,:),model(2,:),model(3,:),'r.', ...
+    est_path(1,:),est_path(2,:),est_path(3,:),'', ...
+    data(1,:),data(2,:),data(3,:),'b*', ...
+    true_path(1,:),true_path(2,:),true_path(3,:),'k-o')  
+view([0,90])
+
+xlabel("x(m)");
+ylabel("y(m)");
+legend('Initial Position',"Model","Estimate",'ICP Solution','Truth')
+legend('boxoff')
+legend('Location','northeast')
+
+
+
+
+% plot3(model(1,:),model(2,:),model(3,:),'r.',data(1,:),data(2,:),data(3,:),'b.')    
+% title("Trajectory Fitting using ICP")
+    % xlabel("x(m)");
+% ylabel("y(m)");
+% legend("Model",'Truth','ICP')
+
+% pause(20)
+
+data=Ri*data;                       % Apply transformation, est_plus2
 for i=1:m
     data(i,:)=data(i,:)+partial_update*Ti(i);      %
 end
     
 
 
-    TR=Ri*TR                           % Update transformation
+    TR=Ri*TR;                           % Update transformation
     TT=Ri*TT+Ti;                        %
     
     if iter >= minIter

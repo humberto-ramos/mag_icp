@@ -1,4 +1,4 @@
-function [TR,TT,data,res] = icp(model,data,maxIter,minIter,critFun,thres,true_path)
+function [TR,TT,data,res] = icp(model,data,maxIter,minIter,critFun,thres,true_path, initial_path, est_path)
 % ICP (iterative closest point) algorithm
 %
 %        # point-to-point distance minimization
@@ -130,8 +130,10 @@ N=size(data,2);
 % Create closest point search structure
 if m<4
     if mTranspose
+        disp("Delaudnay Triangulation")
         DT=delaunayTriangulation(model);
     else
+        disp("Delaudnay Triangulation")
         DT=delaunayTriangulation(model');
     end
 else
@@ -318,18 +320,51 @@ for iter=1:maxIter
 
 
    
-figure(2)
+% figure(2)
+figure(3)
 
-plot3(model(1,:),model(2,:),model(3,:),'r.',true_path(1,:),true_path(2,:),true_path(3,:),'k-o',data(1,:),data(2,:),data(3,:),'b*')    
-% plot3(model(1,:),model(2,:),model(3,:),'r.',data(1,:),data(2,:),data(3,:),'b.')    
-title("Y_Range Trajectory Fitting")
+
+% subplot(2,1,1)
+plot3(initial_path(1,:),initial_path(2,:),initial_path(3,:),'g*', ...
+    model(1,:),model(2,:),model(3,:),'r.', ...
+    est_path(1,:),est_path(2,:),est_path(3,:),'m.', ...
+    data(1,:),data(2,:),data(3,:),'b*', ...
+    true_path(1,:),true_path(2,:),true_path(3,:),'k-o')   
+title("Trajectory Fitting using ICP")
 xlabel("x(m)");
 ylabel("y(m)");
-legend("Model samples",'Truth','ICP')
+legend('Initial Position',"Model","Estimate",'ICP Solution','Truth')
+legend('boxoff')
+legend('Location','northeast')
 
-pause(1)
 
-data=Ri*data;                       % Apply transformation
+% figure(3)
+% subplot(2,1,2)
+% plot3(initial_path(1,:),initial_path(2,:),initial_path(3,:),'g*', ...
+%     model(1,:),model(2,:),model(3,:),'r.', ...
+%     est_path(1,:),est_path(2,:),est_path(3,:),'m.', ...
+%     data(1,:),data(2,:),data(3,:),'b*', ...
+%     true_path(1,:),true_path(2,:),true_path(3,:),'k-o')  
+% view([0,90])
+
+xlabel("x(m)");
+ylabel("y(m)");
+legend('Initial Position',"Model","Estimate",'ICP Solution','Truth')
+legend('boxoff')
+legend('Location','northeast')
+
+
+
+
+% plot3(model(1,:),model(2,:),model(3,:),'r.',data(1,:),data(2,:),data(3,:),'b.')    
+% title("Trajectory Fitting using ICP")
+    % xlabel("x(m)");
+% ylabel("y(m)");
+% legend("Model",'Truth','ICP')
+
+pause(3)
+
+data=Ri*data;                       % Apply transformation, est_plus2
 for i=1:m
     data(i,:)=data(i,:)+partial_update*Ti(i);      %
 end

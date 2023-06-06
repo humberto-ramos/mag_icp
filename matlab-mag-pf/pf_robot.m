@@ -137,7 +137,7 @@ for k = 2:N
          yk = aMap(xt(1),xt(2)) +  mvnrnd(0,Rk,1)'; %Create noisy measurement.
          y_measurement(k,:) = yk';%Log measurement  
          % Modify this value in order to change noise
-         data_pose_and_measurement = [xt(1); xt(2); yk; %aMap(xt(1),xt(2))  OR yk
+         data_pose_and_measurement = [xt(1); xt(2); yk]; %aMap(xt(1),xt(2))  OR yk
          trajectory_collect = [trajectory_collect, data_pose_and_measurement ];
          [wk] = update_pf(xenk,yk,Rk,[],wk,[]);
          figure (1)

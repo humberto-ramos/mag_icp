@@ -6,7 +6,8 @@ global partial_update
 partial_update = 1;
 
 % -- UNCOMMENT THIS SECTION FOR TRAJECTORY FROM FILE -- %
-trajectory = load("trajectory_2.mat");
+traj_name = "trajectory_2";
+trajectory = load(traj_name+".mat");
 
 %% -- NOT CURRENTLY USED --
 % plot3(trajectory.trajectory_matrix(1,:),trajectory.trajectory_matrix(2,:),trajectory.trajectory_matrix(3,:))
@@ -16,27 +17,27 @@ trajectory = load("trajectory_2.mat");
 %% Generate model points to represent Magnetic Map
 % Red Points generate from Fake Map (visualize_map.m file)
 % Specify the range for plot (size of flight space)
-x_range = -1.1:0.01:1.2;
-y_range = -3.5:0.01:3.5;
+x_range = -1.1:0.05:1.2;
+y_range = -3.5:0.05:3.5;
 
-%% -- NOT CURRENTLY USED --
+% %% -- NOT CURRENTLY USED --
 % x_range = -1.1:0.01:1.2;
 % y_range = -3.5:0.01:3.5;
 % x_range = -1.1:0.01:1.2;
 % y_range = -3.5:0.01:3.5;
-
-% Create zeros matrix for final model
+% 
+% % Create zeros matrix for final model
 % model=zeros(3,numel(x_range)*numel(y_range));
-
-% Initialize 2D array to store Magnetic Reading [height(Z)] values
+% 
+% % Initialize 2D array to store Magnetic Reading [height(Z)] values
 % ms_fake = zeros(numel(y_range),numel(x_range));
-
-% Compute intensities for the x and y ranges.
+% 
+% % Compute intensities for the x and y ranges.
 % k = 0;
 % 
 % for j=1:length(x_range)
 % 
-%     for i=1:length(y_range)
+%     for i=1:length(y_range)z
 %         k = k + 1;
 %         ms_fake(i,j) = aMap(x_range(j), y_range(i));
 %         model(1,k) =  x_range(j);
@@ -112,9 +113,10 @@ data = trajectory.trajectory_matrix;
 
 
 %% -- ARTIFICIAL DATA-- %%
-
 sigma = 0.05;
 true_path = data;
+initial_path = true_path;
+
 
 % -- GENERATE ESTIMATE PATH AS +SIGMA FROM TRUE PATH --
 
@@ -129,6 +131,13 @@ n_slopes = N-1;
     %  Unit Vector cos
     %  Unit Vector sin
 path_data = zeros(4,N);
+
+
+%% We must update our true path to have map values.
+% Here we update the true_path to have clean mag data
+for i=1:N
+    true_path(3,i) = aMap(true_path(1,i),true_path(2,i)); %Overwrite mag
+end
 
 
 %% -- CALCULATE SLOPES FROM TRUTH -- %
@@ -151,12 +160,24 @@ end
 path_data(3:4, N) = path_data(3:4, n_slopes);
 
 
+%% CALCULATE ESTIMATED PATH AS OFFSET OF INITIAL PATH
+% After this section, the initial path will have the collected values (with
+% noise), with the "filter estimate" x/y values. 
+% for i = 1: n_slopes
+%     % Estimated Trajectory
+%     initial_path(1:2, i) = initial_path(1:2, i) - 0.5*sigma*path_data(3:4, i);
+% end
+% initial_path(1:2, n_slopes+1) = initial_path(1:2, n_slopes+1) - 0.5*sigma*path_data(3:4, n_slopes);
+
+
 %% CALCULATE ESTIMATED PATH AS OFFSET OF TRUTH
 for i = 1: n_slopes
     % Estimated Trajectory
-    estim_path(1:2, i) = estim_path(1:2, i) + 0.5*sigma*path_data(3:4, i);
+    estim_path(1:2, i) = estim_path(1:2, i) - 0.5*sigma*path_data(3:4, i);
 end
-estim_path(1:2, n_slopes+1) = estim_path(1:2, n_slopes+1) + 0.5*sigma*path_data(3:4, n_slopes);
+estim_path(1:2, n_slopes+1) = estim_path(1:2, n_slopes+1) - 0.5*sigma*path_data(3:4, n_slopes);
+
+initial_path = estim_path;
 
 % Get New Mag Values using new plot points
 for i=1:N
@@ -165,23 +186,24 @@ end
 
 
 %% -- CALCULATE VALUES FOR ALTERNATE TRAJECTORIES
+est_plus_half = estim_path;
+est_minus_half = estim_path;
+est_plus = estim_path;
+est_minus = estim_path;
+est_plus2 = estim_path;
+est_minus2 = estim_path;
+
 for i = 1: n_slopes
     % +/- 0.5*sigma
-    est_plus_half = estim_path;
     est_plus_half(1:2, i) = est_plus_half(1:2, i) + 0.5*sigma*path_data(3:4, i);
-    est_minus_half = estim_path;
     est_minus_half(1:2, i) = est_minus_half(1:2, i) - 0.5*sigma*path_data(3:4, i);
 
      % +/- 1*sigma
-    est_plus = estim_path;
     est_plus(1:2, i) = est_plus(1:2, i) + sigma*path_data(3:4, i);
-    est_minus = estim_path;
     est_minus(1:2, i) = est_minus(1:2, i) - sigma*path_data(3:4, i);
 
      % +/- 1.5*sigma
-    est_plus2 = estim_path;
     est_plus2(1:2, i) = est_plus2(1:2, i) + 1.5*sigma*path_data(3:4, i);
-    est_minus2 = estim_path;
     est_minus2(1:2, i) = est_minus2(1:2, i) - 1.5*sigma*path_data(3:4, i);
 end
 
@@ -190,11 +212,11 @@ end
 % +/- 0.5*sigma
 est_plus_half(1:2, n_slopes+1) = est_plus_half(1:2, n_slopes+1) + 0.5*sigma*path_data(3:4, n_slopes);
 for i=1:N
-    est_plus(3,i) = aMap(est_plus(1,i),est_plus(2,i)); %Overwrite mag
+    est_plus_half(3,i) = aMap(est_plus_half(1,i),est_plus_half(2,i)); %Overwrite mag
 end
 est_minus_half(1:2, n_slopes+1) = est_minus_half(1:2, n_slopes+1) - 0.5*sigma*path_data(3:4, n_slopes);
 for i=1:N
-    est_minus(3,i) = aMap(est_minus(1,i),est_minus(2,i)); %Overwrite mag
+    est_minus_half(3,i) = aMap(est_minus_half(1,i),est_minus_half(2,i)); %Overwrite mag
 end
 
 % +/- 1*sigma
@@ -301,11 +323,11 @@ end
 % ---------------------------
 
 %% ADD ERROR TO INITIAL TRAJECTORY (STARTING POINT)
-error_x = 0.1;
-% estimated_path = true_path;
-initial_path = estim_path;
-initial_path(1,:) = initial_path(1,:) + error_x;
-
+% error_x = 0.1;
+% % estimated_path = true_path;
+% % initial_path = estim_path;
+% initial_path(1,:) = initial_path(1,:) + error_x;
+% initial_path(1:2, :) = estim_path(1:2, :);
 
 %% -- MANUAL ROTATION -- %%
 % v1=0; v2=0; v3=0.2;
@@ -323,7 +345,7 @@ initial_path(1,:) = initial_path(1,:) + error_x;
 % model = [true_path, true_path_minus,true_path_plus];
 
 %% -- GENERATE REFERENCE MAP AS ESTIMATE TRAJECTORIES --
-model = [est_minus, est_plus, est_plus_half, est_minus_half, estim_path, est_minus2, est_plus2];
+model = [estim_path, est_plus_half, est_minus_half, est_plus, est_minus, est_plus2, est_minus2];
 % model = [est_plus2];
 
 
@@ -349,37 +371,46 @@ model = [est_minus, est_plus, est_plus_half, est_minus_half, estim_path, est_min
 
 
 %% -- NOISE -- %%
-% fprintf("Initial path: ");
-% initial_path(1:3, :);
+% fprintf("Initial path: ")
+% initial_path(1:3, :)
 
 % for i=1:numel(initial_path(1,:))
 %     plus_minus = round(rand);
 %     if plus_minus == 0
-%         initial_path(3, i) = initial_path(3, i) - rand*20;
+%         initial_path(3, i) = initial_path(3, i) - rand*5;
 %     else
-%         initial_path(3, i) = initial_path(3, i) + rand*10;
+%         initial_path(3, i) = initial_path(3, i) + rand*5;
 %     end
 % end
 
 %% -- GAUSSIAN NOISE -- 
-sigma_nt = 120;
-N = numel(initial_path(1,:));
-% noise = sigma_nt*randn(1,N);
-% for i=1:N
-%         initial_path(3, i) = initial_path(3, i) + noise(1, i);
-% end
-
-% sigma_nt = 100;
+% sigma_nt = 2;
 % N = numel(initial_path(1,:));
-initial_path(3, :) = initial_path(3, :) + sigma_nt*randn(1,N);
+% % % noise = sigma_nt*randn(1,N);
+% % % for i=1:N
+% % %         initial_path(3, i) = initial_path(3, i) + noise(1, i);
+% % % end
+% % 
+% % % sigma_nt = 100;
+% % % N = numel(initial_path(1,:));
+% noise = sigma_nt*randn(1,N)
+% initial_path(3, :) = initial_path(3, :) + noise;
+% 
+% figure(2)
+
 
 % fprintf("Initial path with noise: ")
 % initial_path(3, :)
 
 
 %% -- Print Residuals -- %%
-% [RotMat,TransVec,dataOut,res]=icp(model,initial_path,[], [], 1,[],true_path);
+% [RotMat,TransVec,dataOut,res]=icp(model,initial_path,[], [], 1,0.00001,true_path);
 
+%% -- CALL ICP FUNCTION -- %%
+[RotMat,TransVec,dataOut,res]=icp(model,initial_path,[], [], 1, 0.001, true_path, initial_path, estim_path);
+
+
+%% 
 % disp('Residual is: ')
 % res
 % disp('Final Matrix X, Y: ')
@@ -397,11 +428,19 @@ initial_path(3, :) = initial_path(3, :) + sigma_nt*randn(1,N);
 
 %% -- PLOT: Model points and data points in transformed positions
 figure(3)
-title("Y_Range Trajectory Fitting")
-plot3(model(1,:),model(2,:),model(3,:),'b*') %,initial_path(1,:),initial_path(2,:),initial_path(3,:),'r.')  
-% model(1,:),model(2,:),model(3,:),'b*', estim_path(1,:),estim_path(2,:),estim_path(3,:),'g.', true_path(1,:),true_path(2,:),true_path(3,:),'k.', 
-% dataOut(1,:),dataOut(2,:),dataOut(3,:)
-legend('ICP solution')%,'Truth','Estimate (Truth - 0.05sigx)','Initial condition')
+% subplot(3,1,3)
+% f1 = plot3(dataOut(1,:),dataOut(2,:),dataOut(3,:),'b*',true_path(1,:),true_path(2,:),true_path(3,:),'k-o', estim_path(1,:),estim_path(2,:),estim_path(3,:),'r.', initial_path(1,:),initial_path(2,:),initial_path(3,:),'c*')  
+% view([0,90])
+% 
+% % model(1,:),model(2,:),model(3,:),'b*', estim_path(1,:),estim_path(2,:),estim_path(3,:),'g.', true_path(1,:),true_path(2,:),true_path(3,:),'k.', 
+% title("Trajectory Fitting Result using ICP")
+% xlabel("x(m)");
+% ylabel("y(m)");
+% legend('ICP solution', 'Truth','Estimate','Initial Position')
+% legend('boxoff')
+% legend('Location','northeast')
+
+% save_figure("ICP_results",traj_name)
 
 %% -- NOT CURRENTLY USED -- 
 % model(1,:),model(2,:),model(3,:),'g.', 
@@ -424,4 +463,5 @@ legend('ICP solution')%,'Truth','Estimate (Truth - 0.05sigx)','Initial condition
 %         initial_path(3, i) = initial_path(3, i) + rand*10;
 %     end
 % end
+
 
