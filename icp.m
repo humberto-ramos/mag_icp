@@ -130,10 +130,10 @@ N=size(data,2);
 % Create closest point search structure
 if m<4
     if mTranspose
-        disp("Delaudnay Triangulation")
+        disp("Delaudnay Triangulation, mTranspose True")
         DT=delaunayTriangulation(model);
     else
-        disp("Delaudnay Triangulation")
+        disp("Delaudnay Triangulation, mTranspose False")
         DT=delaunayTriangulation(model');
     end
 else
@@ -318,7 +318,9 @@ for iter=1:maxIter
             
     end
 
+    
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    
 % figure(2)
 figure(3)
