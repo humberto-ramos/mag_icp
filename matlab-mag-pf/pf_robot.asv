@@ -97,7 +97,10 @@ legend([propagated_plot_legend,true_marker_legend,mean_marker_legend])
 hold off
 grid on
 
-trajectory_collect = zeros(3, );
+% KRISTY ADDED FOR ICP
+icp_measurement_list =
+
+trajectory_collect = [];
 for k = 2:N
     
     if strcmp(USE_JOYSTICK,'false')
@@ -131,12 +134,19 @@ for k = 2:N
         [axes, buttons, povs] = read(joy);
     end
 
-    
+    counter = 0 
+
     if ((mod(k,3)&& strcmp(USE_JOYSTICK,'false')) || buttons(1)==1)     %Get measurement when pressing A
          disp('Measurement received')
          yk = aMap(xt(1),xt(2)) +  mvnrnd(0,Rk,1)'; %Create noisy measurement.
-         y_measurement(k,:) = yk';%Log measurement  
-         trajectory_collect = [trajectory_collect, [xt(1); xt(2); y_measurement]];
+         y_measurement(k,:) = yk';%Log measurement 
+         % KRISTY ADDED FOR ICP
+         icp_list()
+
+
+         % Modify this value in order to change noise
+         data_pose_and_measurement = [xt(1); xt(2); yk]; %aMap(xt(1),xt(2))  OR yk
+         trajectory_collect = [trajectory_collect, data_pose_and_measurement ];
          [wk] = update_pf(xenk,yk,Rk,[],wk,[]);
          figure (1)
          xlim([-1.2 1.2])

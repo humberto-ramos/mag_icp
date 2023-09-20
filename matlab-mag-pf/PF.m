@@ -31,7 +31,7 @@ USE_JOYSTICK = 'true';
 %Run the PF
 [xtrue_pf,xk_pf,state_errors_pf,P_pf,t,trajectory_matrix] = pf_robot(map,USE_JOYSTICK);
            
-save trajectory.mat trajectory_matrix -mat
+% save trajectory.mat trajectory_matrix -mat
       
       
       

@@ -1,13 +1,9 @@
-function [x_corrected, y_corrected] = kristy_mag_icp(trajectory_data);
-
-% clear all 
-% close all
+clear all 
+close all
 addpath("matlab-mag-pf/")
 addpath("collected_trajectories/")
 global partial_update
 partial_update = 1;
-
-
 
 % -- UNCOMMENT THIS SECTION FOR TRAJECTORY FROM FILE -- %
 % traj_name = "trajectory_1";
@@ -19,6 +15,7 @@ partial_update = 1;
 % [x, y] = kristy_icp_correction(trajectory)
 
 
+function [x_corrected, y_corrected] = kristy_icp_correction(trajectory_data)
 %% -- NOT CURRENTLY USED --
 % plot3(trajectory.trajectory_matrix(1,:),trajectory.trajectory_matrix(2,:),trajectory.trajectory_matrix(3,:))
 % xlim([-1 1])

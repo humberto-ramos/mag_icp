@@ -364,7 +364,7 @@ legend('Location','northeast')
 % ylabel("y(m)");
 % legend("Model",'Truth','ICP')
 
-pause(3)
+% pause(3)
 
 data=Ri*data;                       % Apply transformation, est_plus2
 for i=1:m
