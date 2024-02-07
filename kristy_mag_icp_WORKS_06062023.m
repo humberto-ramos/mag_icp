@@ -10,6 +10,7 @@ traj_name = "trajectory_2";
 trajectory = load(traj_name+".mat");
 
 %% -- NOT CURRENTLY USED --
+% NOT USED FOR 06/2023 WORKING VERSION
 % plot3(trajectory.trajectory_matrix(1,:),trajectory.trajectory_matrix(2,:),trajectory.trajectory_matrix(3,:))
 % xlim([-1 1])
 
@@ -21,6 +22,7 @@ x_range = -1.1:0.05:1.2;
 y_range = -3.5:0.05:3.5;
 
 % %% -- NOT CURRENTLY USED --
+% NOT USED FOR 06/2023 WORKING VERSION
 % x_range = -1.1:0.01:1.2;
 % y_range = -3.5:0.01:3.5;
 % x_range = -1.1:0.01:1.2;
@@ -55,6 +57,7 @@ data = trajectory.trajectory_matrix;
 
 
 %% -- NOT CURRENTLY USED --
+% NOT USED FOR 06/2023 WORKING VERSION
 % Use y_range for a y set of data, and x_range for x set
 % N = numel(y_range);
 % N = numel(x_range); % Do not use
@@ -70,6 +73,7 @@ data = trajectory.trajectory_matrix;
 
 
 %% If 3 sided figure used, this will set random values within each plane
+% NOT USED FOR 06/2023 WORKING VERSION
 % ----- DO NOT USE AT THIS TIME -----%
 % data(1:2,1:N1)=rand(2,N1);
 % data([1,3],(N1+1):(N1+N2))=rand(2,N2);
@@ -80,6 +84,7 @@ data = trajectory.trajectory_matrix;
 
 
 %% -- NOT CURRENTLY USED -- 
+% NOT USED FOR 06/2023 WORKING VERSION
 % Transform data points to their start positions
 % Data set is equal to one y value of map data
 % Starts at bottom left corner, and proceeds for N points.
@@ -119,7 +124,6 @@ initial_path = true_path;
 
 
 % -- GENERATE ESTIMATE PATH AS +SIGMA FROM TRUE PATH --
-
 % WE MAY NEED A MORE SOPHISTICATED APPROACH THAT ACCOUNTS
 %FOR CORRELATIONS. MAY BE EXTRACTED FROM COVARIANCE MATRIX OR NORMAL VECTOR TO
 %TRAJECTORY
@@ -161,6 +165,7 @@ path_data(3:4, N) = path_data(3:4, n_slopes);
 
 
 %% CALCULATE ESTIMATED PATH AS OFFSET OF INITIAL PATH
+% NOT USED FOR 06/2023 WORKING VERSION
 % After this section, the initial path will have the collected values (with
 % noise), with the "filter estimate" x/y values. 
 % for i = 1: n_slopes
@@ -241,6 +246,7 @@ end
 
 
 %% -- OLD METHOD FOR MOVING POINTS --
+% NOT USED FOR 06/2023 WORKING VERSION
 % estim_path(1, :) = true_path(1, :)+sigma;
 % % estim_path(2, :) = true_path(2, :)+sigma;
 % 
@@ -306,6 +312,7 @@ end
 
 
 %% -----NOT CURRENTLY USED---------------------
+% NOT USED FOR 06/2023 WORKING VERSION
 % Actual path +- 0.05 sigma
 % true_path_plus = true_path; %Copy all. We will overwrite x and mag.
 % true_path_plus(1,:) = true_path(1,:)+sigma; %Overwrite x
@@ -323,6 +330,7 @@ end
 % ---------------------------
 
 %% ADD ERROR TO INITIAL TRAJECTORY (STARTING POINT)
+% NOT USED FOR 06/2023 WORKING VERSION
 % error_x = 0.1;
 % % estimated_path = true_path;
 % % initial_path = estim_path;
@@ -330,6 +338,7 @@ end
 % initial_path(1:2, :) = estim_path(1:2, :);
 
 %% -- MANUAL ROTATION -- %%
+% NOT USED FOR 06/2023 WORKING VERSION
 % v1=0; v2=0; v3=0.2;
 % R1=[1 0 0;0 cos(v1) -sin(v1);0 sin(v1) cos(v1)];
 % R2=[cos(v2) 0 sin(v2);0 1 0;-sin(v2) 0 cos(v2)];
@@ -350,6 +359,7 @@ model = [estim_path, est_plus_half, est_minus_half, est_plus, est_minus, est_plu
 
 
 %% -- NOT CURRENTLY USED --
+% NOT USED FOR 06/2023 WORKING VERSION
 % data(2,:)=data(2,:)+0.1;
 % data(1,:)=data(1,:)+abs(0.2*randn);
 % data(2,:)=data(2,:)+abs(0.2*randn);
@@ -357,6 +367,7 @@ model = [estim_path, est_plus_half, est_minus_half, est_plus, est_minus, est_plu
 
 % A plot. Model points and data points in start positions
 %%
+% NOT USED FOR 06/2023 WORKING VERSION
 % figure(1)
 % % plot3(model(1,:),model(2,:),model(3,:),'r.')
 % plot3(model(1,:),model(2,:),model(3,:),'r.',data(1,:),data(2,:),data(3,:),'b.')
@@ -371,6 +382,7 @@ model = [estim_path, est_plus_half, est_minus_half, est_plus, est_minus, est_plu
 
 
 %% -- NOISE -- %%
+% NOT USED FOR 06/2023 WORKING VERSION
 % fprintf("Initial path: ")
 % initial_path(1:3, :)
 
@@ -384,6 +396,7 @@ model = [estim_path, est_plus_half, est_minus_half, est_plus, est_minus, est_plu
 % end
 
 %% -- GAUSSIAN NOISE -- 
+% NOT USED FOR 06/2023 WORKING VERSION
 % sigma_nt = 2;
 % N = numel(initial_path(1,:));
 % % % noise = sigma_nt*randn(1,N);
@@ -398,12 +411,12 @@ model = [estim_path, est_plus_half, est_minus_half, est_plus, est_minus, est_plu
 % 
 % figure(2)
 
-
 % fprintf("Initial path with noise: ")
 % initial_path(3, :)
 
 
 %% -- Print Residuals -- %%
+% NOT USED FOR 06/2023 WORKING VERSION
 % [RotMat,TransVec,dataOut,res]=icp(model,initial_path,[], [], 1,0.00001,true_path);
 
 %% -- CALL ICP FUNCTION -- %%
@@ -411,6 +424,7 @@ model = [estim_path, est_plus_half, est_minus_half, est_plus, est_minus, est_plu
 
 
 %% 
+% NOT USED FOR 06/2023 WORKING VERSION
 % disp('Residual is: ')
 % res
 % disp('Final Matrix X, Y: ')
@@ -428,6 +442,7 @@ model = [estim_path, est_plus_half, est_minus_half, est_plus, est_minus, est_plu
 
 %% -- PLOT: Model points and data points in transformed positions
 figure(3)
+% REMAINING CODE IN SECTION NOT USED FOR 06/2023 WORKING VERSION
 % subplot(3,1,3)
 % f1 = plot3(dataOut(1,:),dataOut(2,:),dataOut(3,:),'b*',true_path(1,:),true_path(2,:),true_path(3,:),'k-o', estim_path(1,:),estim_path(2,:),estim_path(3,:),'r.', initial_path(1,:),initial_path(2,:),initial_path(3,:),'c*')  
 % view([0,90])
@@ -443,6 +458,7 @@ figure(3)
 % save_figure("ICP_results",traj_name)
 
 %% -- NOT CURRENTLY USED -- 
+% NOT USED FOR 06/2023 WORKING VERSION
 % model(1,:),model(2,:),model(3,:),'g.', 
 % dataOut(1,:),dataOut(2,:),dataOut(3,:),'b.',
 % figure(2)
@@ -452,6 +468,7 @@ figure(3)
 % title('Transformed data points (green) and model points (red)')
 
 %% 
+% NOT USED FOR 06/2023 WORKING VERSION
 % true_count = 0;
 % estim_count = 0;
 % 

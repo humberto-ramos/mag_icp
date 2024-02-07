@@ -161,6 +161,7 @@ path_data(3:4, N) = path_data(3:4, n_slopes);
 
 
 %% CALCULATE ESTIMATED PATH AS OFFSET OF INITIAL PATH
+% NOT USED FOR 06/2023 WORKING VERSION
 % After this section, the initial path will have the collected values (with
 % noise), with the "filter estimate" x/y values. 
 % for i = 1: n_slopes
@@ -241,6 +242,7 @@ end
 
 
 %% -- OLD METHOD FOR MOVING POINTS --
+% NOT USED FOR 06/2023 WORKING VERSION
 % estim_path(1, :) = true_path(1, :)+sigma;
 % % estim_path(2, :) = true_path(2, :)+sigma;
 % 
@@ -306,6 +308,7 @@ end
 
 
 %% -----NOT CURRENTLY USED---------------------
+% NOT USED FOR 06/2023 WORKING VERSION
 % Actual path +- 0.05 sigma
 % true_path_plus = true_path; %Copy all. We will overwrite x and mag.
 % true_path_plus(1,:) = true_path(1,:)+sigma; %Overwrite x
@@ -323,6 +326,7 @@ end
 % ---------------------------
 
 %% ADD ERROR TO INITIAL TRAJECTORY (STARTING POINT)
+% NOT USED FOR 06/2023 WORKING VERSION
 % error_x = 0.1;
 % % estimated_path = true_path;
 % % initial_path = estim_path;
@@ -330,6 +334,7 @@ end
 % initial_path(1:2, :) = estim_path(1:2, :);
 
 %% -- MANUAL ROTATION -- %%
+% NOT USED FOR 06/2023 WORKING VERSION
 % v1=0; v2=0; v3=0.2;
 % R1=[1 0 0;0 cos(v1) -sin(v1);0 sin(v1) cos(v1)];
 % R2=[cos(v2) 0 sin(v2);0 1 0;-sin(v2) 0 cos(v2)];
@@ -350,6 +355,7 @@ model = [estim_path, est_plus_half, est_minus_half, est_plus, est_minus, est_plu
 
 
 %% -- NOT CURRENTLY USED --
+% NOT USED FOR 06/2023 WORKING VERSION
 % data(2,:)=data(2,:)+0.1;
 % data(1,:)=data(1,:)+abs(0.2*randn);
 % data(2,:)=data(2,:)+abs(0.2*randn);
@@ -357,6 +363,7 @@ model = [estim_path, est_plus_half, est_minus_half, est_plus, est_minus, est_plu
 
 % A plot. Model points and data points in start positions
 %%
+% NOT USED FOR 06/2023 WORKING VERSION
 % figure(1)
 % % plot3(model(1,:),model(2,:),model(3,:),'r.')
 % plot3(model(1,:),model(2,:),model(3,:),'r.',data(1,:),data(2,:),data(3,:),'b.')
@@ -371,6 +378,7 @@ model = [estim_path, est_plus_half, est_minus_half, est_plus, est_minus, est_plu
 
 
 %% -- NOISE -- %%
+% NOT USED FOR 06/2023 WORKING VERSION
 % fprintf("Initial path: ")
 % initial_path(1:3, :)
 
