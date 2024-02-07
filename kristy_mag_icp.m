@@ -1,4 +1,4 @@
-function [x_corrected, y_corrected] = kristy_mag_icp(trajectory_data);
+function [x_corrected, y_corrected] = kristy_mag_icp(trajectory_data, truth_data);
 
 % clear all 
 % close all
@@ -7,7 +7,8 @@ addpath("collected_trajectories/")
 global partial_update
 partial_update = 1;
 
-
+% Use this line if you are passing the matrix into the function directly
+data = trajectory_data;
 
 % -- UNCOMMENT THIS SECTION FOR TRAJECTORY FROM FILE -- %
 % traj_name = "trajectory_1";
@@ -35,9 +36,6 @@ partial_update = 1;
 % Blue data generated from Fake Map or Path traveled in Fake Map
 % Import Data from file (import at top of this file)
 % data = trajectory_data.trajectory_matrix;
-
-% Use this line if you are passing the matrix into the function directly
-data = trajectory_data;
 
 
 %% -- NOT CURRENTLY USED -- 
@@ -74,9 +72,15 @@ data = trajectory_data;
 
 
 %% -- ARTIFICIAL DATA-- %%
-sigma = 0.05;
-true_path = data;
-initial_path = true_path;
+% sigma = 0.05;
+% true_path = data;
+% initial_path = true_path;
+
+%% -- COLLECTED DATA-- %%
+% sigma = 0.05;
+sigma = 0.025;
+true_path = truth_data;
+initial_path = data;
 
 
 % -- GENERATE ESTIMATE PATH AS +SIGMA FROM TRUE PATH --
@@ -84,7 +88,7 @@ initial_path = true_path;
 % WE MAY NEED A MORE SOPHISTICATED APPROACH THAT ACCOUNTS
 %FOR CORRELATIONS. MAY BE EXTRACTED FROM COVARIANCE MATRIX OR NORMAL VECTOR TO
 %TRAJECTORY
-estim_path = true_path;
+estim_path = data;
 N = numel(estim_path(1, :));
 n_slopes = N-1;
     %  Perpendicular Slope
@@ -94,11 +98,11 @@ n_slopes = N-1;
 path_data = zeros(4,N);
 
 
-%% We must update our true path to have map values.
-% Here we update the true_path to have clean mag data
-for i=1:N
-    true_path(3,i) = aMap(true_path(1,i),true_path(2,i)); %Overwrite mag
-end
+% %% We must update our true path to have map values.
+% % Here we update the true_path to have clean mag data
+% for i=1:N
+%     true_path(3,i) = aMap(true_path(1,i),true_path(2,i)); %Overwrite mag
+% end
 
 
 %% -- CALCULATE SLOPES FROM TRUTH -- %
@@ -132,18 +136,20 @@ path_data(3:4, N) = path_data(3:4, n_slopes);
 
 
 %% CALCULATE ESTIMATED PATH AS OFFSET OF TRUTH
-for i = 1: n_slopes
-    % Estimated Trajectory
-    estim_path(1:2, i) = estim_path(1:2, i) - 0.5*sigma*path_data(3:4, i);
-end
-estim_path(1:2, n_slopes+1) = estim_path(1:2, n_slopes+1) - 0.5*sigma*path_data(3:4, n_slopes);
+% -- REMOVED FOR PF DATA INPUT --
+% for i = 1: n_slopes
+%     % Estimated Trajectory
+%     estim_path(1:2, i) = estim_path(1:2, i) - 0.5*sigma*path_data(3:4, i);
+% end
 
-initial_path = estim_path;
+% estim_path(1:2, n_slopes+1) = estim_path(1:2, n_slopes+1) - 0.5*sigma*path_data(3:4, n_slopes);
 
-% Get New Mag Values using new plot points
-for i=1:N
-    estim_path(3,i) = aMap(estim_path(1,i),estim_path(2,i)); %Overwrite mag
-end
+% initial_path = estim_path;
+
+% % Get New Mag Values using new plot points
+% for i=1:N
+%     estim_path(3,i) = aMap(estim_path(1,i),estim_path(2,i)); %Overwrite mag
+% end
 
 
 %% -- CALCULATE VALUES FOR ALTERNATE TRAJECTORIES

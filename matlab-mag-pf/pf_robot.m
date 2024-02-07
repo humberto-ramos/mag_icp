@@ -1,7 +1,7 @@
 %% Particle filter
 %Authors: Humberto Ramos
 %Created: July 23,2021
-function [xtrue,xk_updated,state_errors, Pk_updated,t, trajectory_collect] = pf_robot(map,USE_JOYSTICK);
+function [xtrue,xk_updated,state_errors, Pk_updated, trajectory_collect] = pf_robot(map,USE_JOYSTICK);
 disp('Particle filter initialized....')
 %Setup xbox controller
 if strcmp(USE_JOYSTICK,'true')
@@ -97,11 +97,13 @@ legend([propagated_plot_legend,true_marker_legend,mean_marker_legend])
 hold off
 grid on
 
-% KRISTY ADDED FOR ICP
+trajectory_collect = [];
+
+% -- KRISTY ADDED FOR ICP --
 icp_measure_count = 0;
 icp_measurement_list = [];
-
-trajectory_collect = [];
+truth_list = [];
+% --------------------------
 
 for k = 2:N
     
@@ -115,8 +117,12 @@ for k = 2:N
         %Measurements are taken with button A (Xbox one controller)
     end
     %Propagate for ONE delta
+    % NOTE: propogate_pf and distrete_dyn do the same thing but one with 
+    % noise one without.
     [xenk] = propagate_pf(xenk,delta_p,delta_psi,std_noises,[]);
      % simulate the system to take measurement then update.
+
+     % xtrue -- this is the map values WITHOUT NOISE
     xt = discrete_dyn(xt,delta_p,delta_psi);
     xtrue(k,:) = xt';
     %It is recommended to compute the estimates before updating and
@@ -138,7 +144,8 @@ for k = 2:N
 
     if ((mod(k,3)&& strcmp(USE_JOYSTICK,'false')) || buttons(1)==1)     %Get measurement when pressing A
          disp('Measurement received')
-         yk = aMap(xt(1),xt(2)) +  mvnrnd(0,Rk,1)'; %Create noisy measurement.
+         true_mag = aMap(xt(1),xt(2));
+         yk = true_mag +  mvnrnd(0,Rk,1)'; %Create noisy measurement.
          y_measurement(k,:) = yk';%Log measurement 
 
          % Modify this value in order to change noise
@@ -146,15 +153,19 @@ for k = 2:N
          trajectory_collect = [trajectory_collect, data_pose_and_measurement ];
          [wk] = update_pf(xenk,yk,Rk,[],wk,[]);
 
-         % KRISTY ADDED FOR ICP
-         % [xt(1); xt(2); yk]
+         % -- KRISTY ADDED FOR ICP --
          icp_measurement_list = [icp_measurement_list, data_pose_and_measurement]
          icp_measure_count = icp_measure_count + 1;
-         if (icp_measure_count >= 4)
-             [x, y] = kristy_mag_icp(icp_measurement_list)
+         truth_pose_and_measurement = [xt(1); xt(2); true_mag];
+         truth_list = [truth_list, truth_pose_and_measurement];
+         if (icp_measure_count >= 6)
+             [est_x, est_y] = [xt(1), xt(2)]
+             [x, y] = kristy_mag_icp(icp_measurement_list, truth_list)
              icp_measure_count = 0;
              icp_measurement_list = [];
+             truth_pose_and_measurement = [];
          end
+         % --------------------------
 
          figure (1)
          xlim([-1.2 1.2])
